@@ -1,11 +1,12 @@
 const router = require('express').Router();
 
 
-const fakedata = [ { id : 1, name: 'Lenleagg' }, { id: 2, name: 'Pyrrhus' }] ;
-
 
 router.get('/games', (req, res) => {
-    res.status(200).send('<h1>Successfully passed security</h1>') //.json(fakedata);
+    
+    let randomNum = Math.floor(Math.random()*100);
+    console.log('in api/games', randomNum)
+    res.status(200).json( {number: randomNum}); //.json(fakedata);
 })
 
 
