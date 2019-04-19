@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 
 
-router.get('/games', (req, res) => {
+router.post('/games', (req, res) => {
     
     let randomNum = Math.floor(Math.random()*100);
     console.log('in api/games', randomNum)
