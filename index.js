@@ -128,10 +128,11 @@ server.delete('/removeaccount', async (req, res) => {
     //     last_name:  'User'
     //   }).select('id')
 
-    const {username, password} = req.body;
-    console.log(username)      //where({ id: id })
-    const response = await db('users').where({username : username, password: password }).first();  //.select('id')
-    if(response){
+    let {username, password} = req.body;
+    console.log(username, password)      //where({ id: id })
+    const response = await db('users').where({username : username }).first();  //.select('id')
+    console.log('response is', response) 
+    if(response && bcrypt.compareSync(password, response.password)){
         const count = await db('users').where({ id : response.id}).del();
         console.log('count is', count)
         if (count > 0)
@@ -148,10 +149,12 @@ server.delete('/removeaccount', async (req, res) => {
 
 server.put('/updatepassword', async (req, res) => {
     try {
-        const {username, oldPassword, newPassword} = req.body;
+        let {username, oldPassword, newPassword} = req.body;
         if(username && oldPassword && newPassword){
-            const response = await db('users').where({username : username, password: oldPassword}).first();  //.select('id')
-            if(response){
+            const response = await db('users').where({username : username}).first();  //.select('id')
+            console.log('response is', response)
+            if(response && bcrypt.compareSync(oldPassword, response.password) ){
+                newPassword = bcrypt.hashSync(newPassword, 10);
                  const count = await db('users').where({ id : response.id}).update({ password: newPassword });
                  console.log('count is', count)
                 if (count > 0)
@@ -167,8 +170,6 @@ server.put('/updatepassword', async (req, res) => {
         res.status(500).send(err);
     }
 
-
-    console.log(response)
 })
 
   
