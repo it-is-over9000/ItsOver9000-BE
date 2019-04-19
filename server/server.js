@@ -91,7 +91,7 @@ server.post('/register', (req, res) => {
         res.status(400).send(`You must provide both a username and a password. Please try again.`);
 });
 
-server.get('/register', lock, async (req, res) => {
+server.get('/register',  async (req, res) => {
     try {
         const users =await db('users');
         res.status(200).send(users);
