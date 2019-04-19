@@ -130,7 +130,7 @@ server.delete('/removeaccount', async (req, res) => {
 
     const {username, password} = req.body;
     console.log(username)      //where({ id: id })
-    const response = await db('users').where({username : username, password: bcrypt.hashSync(password, 10) }).first();  //.select('id')
+    const response = await db('users').where({username : username, password: password }).first();  //.select('id')
     if(response){
         const count = await db('users').where({ id : response.id}).del();
         console.log('count is', count)
