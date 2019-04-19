@@ -4,8 +4,8 @@ const router = require('express').Router();
 const fakedata = [ { id : 1, name: 'Lenleagg' }, { id: 2, name: 'Pyrrhus' }] ;
 
 
-router.get('/', (req, res) => {
-    res.status(200).send('<h1>Server is ready. Send a username and password to register.</h1>') //.json(fakedata);
+router.get('/games', (req, res) => {
+    res.status(200).send('<h1>Successfully passed security</h1>') //.json(fakedata);
 })
 
 

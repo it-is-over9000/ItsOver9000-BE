@@ -24,8 +24,8 @@ server.use(logger);
 //server.use(guest);
 
 
-server.use('/authorization', auth, notFound ); // notFound() passed after auth, so that it only runs if auth does not run
-server.use('/games', chessApi, notFound)
+server.use('/authorization', notFound ); // notFound() passed after auth, so that it only runs if auth does not run
+server.use('/api', lock ,checkRole('registered user'), chessApi ,  notFound);
 
 
 server.post('/register', (req, res) => {
@@ -43,18 +43,31 @@ server.post('/register', (req, res) => {
       });
 });
 
+server.get('/register', async (req, res) => {
+    try {
+        const users =await db('users');
+        res.status(200).send(users);
+
+    } catch (err) {
+        res.status(500).send('An Internal Error Occurred.')
+    }
+    
+    console.log(db('users'));
+})
+
 server.post('/login', async (req, res) => {
     try{
         const {username, password} = req.body;
         const user = await db('users').where({username : username}).first(); 
         console.log('user is', user);
-        if( bcrypt.compareSync(password, user.password))
+        if( user && bcrypt.compareSync(password, user.password) ){
             console.log('passwords match');
-        if(username && password){
-            res.status(200).send('username and password received');
-         }
-         else
-             res.status(400).send('Please provide both a username and password');
+            
+            const token = generateToken(user);
+            
+            res.status(200).json({ message: 'username and password match', token });
+        } else
+             res.status(400).json({ message: 'Invalid Credentials. Please try again.'});
      
          // find the user in the database by it's username then
         //  if (!user || !bcrypt.compareSync(credentials.password, user.password)) {
@@ -69,15 +82,41 @@ server.post('/login', async (req, res) => {
 
    // res.status(200).send('nothing was actually done');
 
-})
+}) // end login
 
+function lock (req, res, next) {
+    const token = req.headers.authorization;
+    console.log('token is', token)
+    if ( token ) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+            if(err) 
+                res.status(403).json({ message: 'Token is invalid'});
+            else {
+                req.decodedToken = decodedToken;
+                next();
+            }
+        })
+        
+    } else {
+        res.status(401).json({ message: 'no token provided'})
+    }
+}
+function checkRole ( role ) {
+    return function (req, res, next){
+        if (req.decodedToken.role === role )
+            next();
+        else
+            res.status(403).json({ message: `you need to be a ${role}`});
+    };
+}
 function generateToken ( user ) {
     const payload = {
                         subject: user.id,
                         username: user.username,
+                        role: user.role,
                     }
     const options = {
-                        expiresIn: '2h'
+                        expiresIn: '1h'
                     }
     return jwt.sign( payload, secret, options);
 }
