@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const jwtKey = process.env.JWT_SECRET || 'I am so shiny';
 
 
 const fakedata = [ { id : 1, name: 'Lenleagg' }, { id: 2, name: 'Pyrrhus' }] ;
@@ -18,4 +19,7 @@ router.post('/', (req, res) => {
 })
 
 
-module.exports = router;
+module.exports = {
+    router,
+   /// authenticate
+};
